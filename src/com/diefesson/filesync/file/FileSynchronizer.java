@@ -1,6 +1,7 @@
 package com.diefesson.filesync.file;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,7 +32,7 @@ public class FileSynchronizer {
 	}
 	
 	public String solvePath(String path) {
-		return root + "/" + path;
+		return Paths.get(root).relativize(Paths.get(path)).toString();
 	}
 
 	public synchronized boolean hasFile(String path) {

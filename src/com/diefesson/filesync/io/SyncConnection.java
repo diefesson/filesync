@@ -13,6 +13,10 @@ public class SyncConnection implements AutoCloseable {
 	private final Socket socket;
 	private final SyncInputStream in;
 	private final SyncOutputStream out;
+	
+	public SyncConnection(String address, int port) throws IOException{
+		this(new Socket(address, port));
+	}
 
 	public SyncConnection(Socket socket) throws IOException {
 		this.socket = socket;

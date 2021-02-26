@@ -2,6 +2,7 @@ package com.diefesson.filesync;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import com.diefesson.filesync.file.FileScanner;
@@ -44,15 +45,20 @@ public class App {
 			var server = new Server();
 			server.setOnConnect(new ConnectionDispatcher(synchronizer, executor));
 			server.start("0.0.0.0", port);
+			servers.put(port, server);
 		} catch (Exception e) {
 			System.err.println("App %d: could not start server");
 		}
 	}
 	
 	public void unlisten(int port) {
-		var server = servers.get(port);
+		var server = servers.remove(port);
 		if(server != null)
 			server.stop();
+	}
+	
+	public Set<Integer> getPorts() {
+		return servers.keySet();
 	}
 	
 }
