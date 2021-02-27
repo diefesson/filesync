@@ -26,13 +26,13 @@ public class FileSynchronizer {
 		}
 		return null;
 	}
-	
+
 	public String getRoot() {
 		return root;
 	}
-	
+
 	public String solvePath(String path) {
-		return Paths.get(root).relativize(Paths.get(path)).toString();
+		return Paths.get(root, path).toString();
 	}
 
 	public synchronized boolean hasFile(String path) {
@@ -79,17 +79,17 @@ public class FileSynchronizer {
 		}
 		return false;
 	}
-	
+
 	public synchronized void unlockRead(String path) {
 		var entry = getEntry(path);
-		if(entry != null) {
+		if (entry != null) {
 			entry.unlockRead();
 		}
 	}
-	
+
 	public synchronized void unlockWrite(String path) {
 		var entry = getEntry(path);
-		if(entry != null) {
+		if (entry != null) {
 			entry.unlockWrite();
 		}
 	}

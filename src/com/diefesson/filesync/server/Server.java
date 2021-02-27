@@ -14,20 +14,20 @@ import com.diefesson.filesync.io.SyncConnection;
 public class Server implements Runnable {
 
 	private ServerSocket serverSocket;
-	private boolean run;
+	private boolean run = false;
 	private OnConnectListener onConnect;
-	
+
 	public void setOnConnect(OnConnectListener onConnect) {
 		this.onConnect = onConnect;
 	}
 
 	public void start(String address, int port) throws IOException {
-		if (run = true)
+		if (run == true)
 			return;
 		serverSocket = new ServerSocket(port, 0, Inet4Address.getByName(address));
 		new Thread(this).start();
 	}
-	
+
 	public void stop() {
 		run = false;
 	}
@@ -38,6 +38,7 @@ public class Server implements Runnable {
 		while (run) {
 			if (onConnect != null) {
 				try {
+
 					var s = serverSocket.accept();
 					onConnect.onConnect(new SyncConnection(s));
 				} catch (IOException e) {
@@ -49,8 +50,8 @@ public class Server implements Runnable {
 			}
 		}
 	}
-	
-	public interface OnConnectListener{
+
+	public interface OnConnectListener {
 		void onConnect(SyncConnection connection);
 	}
 

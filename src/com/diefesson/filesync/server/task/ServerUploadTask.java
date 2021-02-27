@@ -21,17 +21,14 @@ public class ServerUploadTask implements Runnable {
 	@Override
 	public void run() {
 		String path = null;
-		try(connection){
+		try (connection) {
 			var in = connection.getIn();
 			var out = connection.getOut();
 			path = in.readUTF();
-			var locked = synchronizer.add(path, true);
-			out.writeBoolean(locked);
-			if(locked) {
-				in.readToFile(synchronizer.solvePath(path));
-			}
+			in.readToFile(synchronizer.solvePath(path));
 		} catch (Exception e) {
 			System.err.println("ServerUploadTask %s: error donwloading file from client");
+			e.printStackTrace();
 		} finally {
 			synchronizer.unlockWrite(path);
 		}

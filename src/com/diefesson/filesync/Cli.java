@@ -12,8 +12,8 @@ public class Cli implements Runnable {
 	private final App app;
 	private final Scanner scanner;
 
-	public Cli(App app) {
-		this.app = app;
+	public Cli(String root) {
+		app = new App(root);
 		scanner = new Scanner(System.in);
 	}
 
@@ -22,27 +22,43 @@ public class Cli implements Runnable {
 		while (true) {
 			System.out.print("> ");
 			var c = nextCommand();
-			if(c.is("listen")) {
+			if (c.is("listen")) {
 				app.listen(Integer.parseInt(c.getArg(0)));
 				System.out.println("Server started");
 				continue;
 			}
-			if(c.is("unlisten")) {
+			if (c.is("unlisten")) {
 				app.unlisten(Integer.parseInt(c.getArg(0)));
 				System.out.println("Server stopped");
 				continue;
 			}
-			if(c.is("ports")) {
+			if (c.is("ports")) {
 				var ports = app.getPorts();
 				System.out.print("Ports: ");
-				if(ports.size() == 0)
+				if (ports.size() == 0)
 					System.out.print("no ports");
-				for(var p : ports) {
+				for (var p : ports) {
 					System.out.print(p);
 					System.out.print(" ");
 				}
 				System.out.println();
+				continue;
 			}
+			if (c.is("download")) {
+				var address = c.getArg(0);
+				var port = Integer.parseInt(c.getArg(1));
+				var path = c.getArg(2);
+				app.download(address, port, path);
+				continue;
+			}
+			if (c.is("upload")) {
+				var address = c.getArg(0);
+				var port = Integer.parseInt(c.getArg(1));
+				var path = c.getArg(2);
+				app.upload(address, port, path);
+				continue;
+			}
+			System.out.println("Unknow command: " + c.getName());
 		}
 	}
 
@@ -66,11 +82,11 @@ public class Cli implements Runnable {
 		public String[] getArgs() {
 			return args;
 		}
-		
+
 		public String getArg(int index) {
 			return args[index];
 		}
-		
+
 		public boolean is(String name) {
 			return this.name.equals(name);
 		}

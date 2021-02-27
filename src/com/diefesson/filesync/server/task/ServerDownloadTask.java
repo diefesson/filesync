@@ -7,6 +7,7 @@ import com.diefesson.filesync.io.SyncConnection;
 
 /**
  * Resolves download requests
+ * 
  * @author Diefesson de Sousa Silva
  *
  */
@@ -27,11 +28,9 @@ public class ServerDownloadTask implements Runnable {
 			var in = connection.getIn();
 			var out = connection.getOut();
 			path = in.readUTF();
-			var locked = synchronizer.lockRead(path);
-			out.writeBoolean(locked);
-			if(locked) {
-				out.writeFromFile(synchronizer.solvePath(path));
-			}
+			synchronizer.lockRead(path);
+			out.writeFromFile(synchronizer.solvePath(path));
+			out.flush();
 		} catch (IOException e) {
 			System.err.println("ServerDownloadTask %s: error uploading file to client".formatted(path));
 			e.printStackTrace();

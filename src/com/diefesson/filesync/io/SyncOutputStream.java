@@ -18,6 +18,7 @@ public class SyncOutputStream extends DataOutputStream {
 
 	/**
 	 * Writes from a file to this stream
+	 * 
 	 * @param path
 	 * @throws IOException
 	 */
@@ -25,10 +26,9 @@ public class SyncOutputStream extends DataOutputStream {
 		try (var in = new FileInputStream(path)) {
 			var buffer = new byte[1024];
 			int readed;
-			do {
-				readed = in.read(buffer);
+			while ((readed = in.read(buffer)) != -1) {
 				write(buffer, 0, readed);
-			} while (readed != -1);
+			}
 		}
 	}
 

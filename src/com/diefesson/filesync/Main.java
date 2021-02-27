@@ -7,6 +7,7 @@ package com.diefesson.filesync;
  */
 public class Main {
 	public static void main(String[] args) {
-		new Cli(new App("C:/teste")).run();
+		var root = (args.length > 0) ? args[0] : "C:/teste";
+		new Cli(root).run();
 	}
 }

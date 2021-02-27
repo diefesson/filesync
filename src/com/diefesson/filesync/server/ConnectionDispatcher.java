@@ -27,14 +27,14 @@ public class ConnectionDispatcher implements OnConnectListener {
 	@Override
 	public void onConnect(SyncConnection connection) {
 		executor.execute(() -> {
-			try (connection) {
+			try {
 				int r = connection.getIn().read();
-				if(r == Constants.DOWNLOAD_REQUEST) {
+				if (r == Constants.DOWNLOAD_REQUEST) {
 					executor.execute(new ServerDownloadTask(connection, synchronizer));
-				} else if(r == Constants.UPLOAD_REQUEST) {
+				} else if (r == Constants.UPLOAD_REQUEST) {
 					executor.execute(new ServerUploadTask(connection, synchronizer));
 				}
-			} catch(IOException e) {
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		});
