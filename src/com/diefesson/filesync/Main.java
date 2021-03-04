@@ -1,5 +1,7 @@
 package com.diefesson.filesync;
 
+import com.diefesson.filesync.cli.Cli;
+
 /**
  * 
  * @author Diefesson de Sousa Silva
@@ -8,6 +10,8 @@ package com.diefesson.filesync;
 public class Main {
 	public static void main(String[] args) {
 		var root = (args.length > 0) ? args[0] : "C:/teste";
-		new Cli(root).run();
+		var app = new App(root);
+		app.scan();
+		new Cli(app).run();
 	}
 }
