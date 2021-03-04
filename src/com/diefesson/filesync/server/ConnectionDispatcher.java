@@ -3,7 +3,7 @@ package com.diefesson.filesync.server;
 import java.io.IOException;
 import java.util.concurrent.Executor;
 
-import com.diefesson.filesync.file.FileSynchronizer;
+import com.diefesson.filesync.file.AcessSynchronizer;
 import com.diefesson.filesync.io.SyncConnection;
 import com.diefesson.filesync.server.Server.OnConnectListener;
 import com.diefesson.filesync.server.task.ServerDownloadTask;
@@ -16,10 +16,10 @@ import com.diefesson.filesync.server.task.ServerUploadTask;
  */
 public class ConnectionDispatcher implements OnConnectListener {
 
-	private final FileSynchronizer synchronizer;
+	private final AcessSynchronizer synchronizer;
 	private final Executor executor;
 
-	public ConnectionDispatcher(FileSynchronizer synchronizer, Executor executor) {
+	public ConnectionDispatcher(AcessSynchronizer synchronizer, Executor executor) {
 		this.synchronizer = synchronizer;
 		this.executor = executor;
 	}

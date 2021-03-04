@@ -12,7 +12,6 @@ public class CliConstants {
 	public static final String UNLISTEN = "unlisten";
 
 	// Sync commands
-	public static final String SET_USER = "set_user";
 	public static final String DOWNLOAD = "download";
 	public static final String UPLOAD = "upload";
 	public static final String SYNC = "list";
@@ -21,6 +20,14 @@ public class CliConstants {
 	public static final String ADD_USER = "add_user";
 	public static final String LIST_USERS = "list_users";
 	public static final String REMOVE_USER = "remove_user";
+
+	// Authentication commands
+	public static final String LOGIN = "login";
+	public static final String GO_ANONYMOUS = "go_anonymous";
+
+	// Credential persistence
+	public static final String SAVE_CREDENTIALS = "save_credentials";
+	public static final String LOAD_CREDENTIALS = "load_credentials";
 
 	// Exit command
 	public static final String EXIT = "exit";

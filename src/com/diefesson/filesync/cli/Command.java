@@ -1,5 +1,10 @@
 package com.diefesson.filesync.cli;
 
+/**
+ * 
+ * @author Diefesson de Sousa Silva
+ *
+ */
 public class Command {
 	private String name;
 	private String[] args;

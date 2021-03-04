@@ -20,8 +20,8 @@ public class SyncConnection implements AutoCloseable {
 
 	public SyncConnection(Socket socket) throws IOException {
 		this.socket = socket;
-		this.in = new SyncInputStream(socket.getInputStream());
-		this.out = new SyncOutputStream(socket.getOutputStream());
+		in = new SyncInputStream(socket.getInputStream());
+		out = new SyncOutputStream(socket.getOutputStream());
 	}
 
 	public SyncInputStream getIn() {

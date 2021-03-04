@@ -2,7 +2,7 @@ package com.diefesson.filesync.server.task;
 
 import java.io.IOException;
 
-import com.diefesson.filesync.file.FileSynchronizer;
+import com.diefesson.filesync.file.AcessSynchronizer;
 import com.diefesson.filesync.io.SyncConnection;
 
 /**
@@ -14,9 +14,9 @@ import com.diefesson.filesync.io.SyncConnection;
 public class ServerDownloadTask implements Runnable {
 
 	private final SyncConnection connection;
-	private final FileSynchronizer synchronizer;
+	private final AcessSynchronizer synchronizer;
 
-	public ServerDownloadTask(SyncConnection connection, FileSynchronizer synchronizer) {
+	public ServerDownloadTask(SyncConnection connection, AcessSynchronizer synchronizer) {
 		this.connection = connection;
 		this.synchronizer = synchronizer;
 	}

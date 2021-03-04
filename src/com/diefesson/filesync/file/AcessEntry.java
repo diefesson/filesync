@@ -8,19 +8,19 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @author Diefesson de Sousa Silva
  *
  */
-public class FileEntry {
+public class AcessEntry {
 
 	private final ReadWriteLock lock = new ReentrantReadWriteLock();
 	private final String path;
 
-	public FileEntry(String path) {
+	public AcessEntry(String path) {
 		this.path = path;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof FileEntry)
-			return ((FileEntry) obj).path.equals(path);
+		if (obj instanceof AcessEntry)
+			return ((AcessEntry) obj).path.equals(path);
 		return false;
 	}
 

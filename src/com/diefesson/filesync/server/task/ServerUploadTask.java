@@ -1,6 +1,6 @@
 package com.diefesson.filesync.server.task;
 
-import com.diefesson.filesync.file.FileSynchronizer;
+import com.diefesson.filesync.file.AcessSynchronizer;
 import com.diefesson.filesync.io.SyncConnection;
 
 /**
@@ -11,9 +11,9 @@ import com.diefesson.filesync.io.SyncConnection;
 public class ServerUploadTask implements Runnable {
 
 	private final SyncConnection connection;
-	private final FileSynchronizer synchronizer;
+	private final AcessSynchronizer synchronizer;
 
-	public ServerUploadTask(SyncConnection connection, FileSynchronizer synchronizer) {
+	public ServerUploadTask(SyncConnection connection, AcessSynchronizer synchronizer) {
 		this.connection = connection;
 		this.synchronizer = synchronizer;
 	}
@@ -23,7 +23,6 @@ public class ServerUploadTask implements Runnable {
 		String path = null;
 		try (connection) {
 			var in = connection.getIn();
-			var out = connection.getOut();
 			path = in.readUTF();
 			in.readToFile(synchronizer.solvePath(path));
 		} catch (Exception e) {

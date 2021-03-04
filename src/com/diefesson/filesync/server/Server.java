@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.ServerSocket;
 
+import com.diefesson.filesync.io.ConnectionAuthenticator;
 import com.diefesson.filesync.io.SyncConnection;
 
 /**
@@ -13,9 +14,14 @@ import com.diefesson.filesync.io.SyncConnection;
  */
 public class Server implements Runnable {
 
+	private final ConnectionAuthenticator authenticator;
 	private ServerSocket serverSocket;
 	private boolean run = false;
 	private OnConnectListener onConnect;
+
+	public Server(ConnectionAuthenticator authenticator) {
+		this.authenticator = authenticator;
+	}
 
 	public void setOnConnect(OnConnectListener onConnect) {
 		this.onConnect = onConnect;
@@ -23,7 +29,7 @@ public class Server implements Runnable {
 
 	public void start(String address, int port) throws IOException {
 		if (run == true)
-			return;
+			throw new IllegalStateException("Server already is running");
 		serverSocket = new ServerSocket(port, 0, Inet4Address.getByName(address));
 		new Thread(this).start();
 	}
@@ -38,9 +44,11 @@ public class Server implements Runnable {
 		while (run) {
 			if (onConnect != null) {
 				try {
-
-					var s = serverSocket.accept();
-					onConnect.onConnect(new SyncConnection(s));
+					var connection = new SyncConnection(serverSocket.accept());
+					if (authenticator.verify(connection))
+						onConnect.onConnect(connection);
+					else
+						connection.close();
 				} catch (IOException e) {
 					var address = serverSocket.getInetAddress().getHostAddress();
 					var port = serverSocket.getLocalPort();

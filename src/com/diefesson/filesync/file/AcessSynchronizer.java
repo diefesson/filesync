@@ -10,16 +10,20 @@ import java.util.Set;
  * @author Diefesson de Sousa Silva
  *
  */
-public class FileSynchronizer {
+public class AcessSynchronizer {
 
 	private final String root;
-	private final Set<FileEntry> files = new HashSet<>();
+	private final Set<AcessEntry> files = new HashSet<>();
 
-	public FileSynchronizer(String rootDir) {
+	public AcessSynchronizer(String rootDir) {
 		this.root = rootDir;
+		var scanner = new FileScanner(rootDir);
+		scanner.setOnFile((file) -> {
+			add(file);
+		});
 	}
 
-	private FileEntry getEntry(String path) {
+	private AcessEntry getEntry(String path) {
 		for (var fe : files) {
 			if (fe.getPath() == path)
 				return fe;
@@ -44,7 +48,7 @@ public class FileSynchronizer {
 	}
 
 	public synchronized boolean add(String path, boolean lockWrite) {
-		var entry = new FileEntry(path);
+		var entry = new AcessEntry(path);
 		if (files.add(entry)) {
 			if (lockWrite)
 				entry.lockWrite();
