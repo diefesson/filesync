@@ -1,8 +1,9 @@
 package com.diefesson.filesync.server.task;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
-import com.diefesson.filesync.file.AcessSynchronizer;
+import com.diefesson.filesync.file.FileSystemBridge;
 import com.diefesson.filesync.io.SyncConnection;
 
 /**
@@ -14,28 +15,25 @@ import com.diefesson.filesync.io.SyncConnection;
 public class ServerDownloadTask implements Runnable {
 
 	private final SyncConnection connection;
-	private final AcessSynchronizer synchronizer;
+	private final FileSystemBridge fileSystemBridge;
 
-	public ServerDownloadTask(SyncConnection connection, AcessSynchronizer synchronizer) {
+	public ServerDownloadTask(SyncConnection connection, FileSystemBridge fileSystemBridge) {
 		this.connection = connection;
-		this.synchronizer = synchronizer;
+		this.fileSystemBridge = fileSystemBridge;
 	}
 
 	@Override
 	public void run() {
-		String path = null;
 		try (connection) {
 			var in = connection.getIn();
 			var out = connection.getOut();
-			path = in.readUTF();
-			synchronizer.lockRead(path);
-			out.writeFromFile(synchronizer.solvePath(path));
-			out.flush();
+			var path = Path.of(in.readUTF());
+			try (var fileIn = fileSystemBridge.readFile(path)) {
+				fileIn.transferTo(out);
+			}
 		} catch (IOException e) {
-			System.err.println("ServerDownloadTask %s: error uploading file to client".formatted(path));
+			System.err.println("ServerDownloadTask %s: error while serving download to client");
 			e.printStackTrace();
-		} finally {
-			synchronizer.unlockRead(path);
 		}
 	}
 }

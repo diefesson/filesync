@@ -1,6 +1,7 @@
 package com.diefesson.filesync;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -8,7 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import com.diefesson.filesync.file.AcessSynchronizer;
+import com.diefesson.filesync.file.FileSystemBridge;
 import com.diefesson.filesync.io.AuthException;
 import com.diefesson.filesync.io.ConnectionAuthenticator;
 import com.diefesson.filesync.io.SyncConnection;
@@ -26,25 +27,42 @@ import com.diefesson.filesync.user.UserManager;
  */
 public class App {
 
-	private final AcessSynchronizer synchronizer;
 	private final UserManager userManager;
-	private final ConnectionAuthenticator authenticator;
-	private final ExecutorService executor;
+	private final FileSystemBridge fileSystemBridge;
+	private final ConnectionAuthenticator connectionAuthenticator;
+	private final ExecutorService executorService;
 	private final Map<Integer, Server> servers;
 
-	public App(AcessSynchronizer acessSynchronizer, UserManager userManager) {
-		this.synchronizer = acessSynchronizer;
-		this.userManager = userManager;
-		this.authenticator = new ConnectionAuthenticator(userManager);
-		executor = Executors.newFixedThreadPool(8);
+	public App(Path root) throws IOException {
+		userManager = new UserManager();
+		userManager.loadFromFile(root.resolve("users.txt"));
+		connectionAuthenticator = new ConnectionAuthenticator(userManager);
+		fileSystemBridge = new FileSystemBridge(root.resolve("files"));
+		executorService = Executors.newFixedThreadPool(8);
 		servers = new HashMap<>();
+	}
+
+	public UserManager getUserManager() {
+		return userManager;
+	}
+
+	public FileSystemBridge getFileSystemBridge() {
+		return fileSystemBridge;
+	}
+
+	public ConnectionAuthenticator getConnectionAuthenticator() {
+		return connectionAuthenticator;
+	}
+
+	public ExecutorService getExecutorService() {
+		return executorService;
 	}
 
 	public void listen(int port) {
 		unlisten(port);
 		try {
-			var server = new Server(authenticator);
-			server.setOnConnect(new ConnectionDispatcher(synchronizer, executor));
+			var server = new Server(connectionAuthenticator);
+			server.setOnConnect(new ConnectionDispatcher(executorService, fileSystemBridge));
 			server.start("0.0.0.0", port);
 			servers.put(port, server);
 		} catch (IOException e) {
@@ -62,27 +80,19 @@ public class App {
 		return servers.keySet();
 	}
 
-	public AcessSynchronizer getSynchronizer() {
-		return synchronizer;
-	}
-
-	public UserManager getUserManager() {
-		return userManager;
-	}
-
-	public Future<?> download(String address, int port, String path) throws IOException, AuthException {
+	public Future<?> download(String address, int port, Path path) throws IOException, AuthException {
 		var connection = createConnection(address, port);
-		return executor.submit(new DownloadTask(path, connection, synchronizer));
+		return executorService.submit(new DownloadTask(connection, fileSystemBridge, path));
 	}
 
-	public Future<?> upload(String address, int port, String path) throws IOException, AuthException {
+	public Future<?> upload(String address, int port, Path path) throws IOException, AuthException {
 		var connection = createConnection(address, port);
-		return executor.submit(new UploadTask(path, connection, synchronizer));
+		return executorService.submit(new UploadTask(connection, fileSystemBridge, path));
 	}
 
 	private SyncConnection createConnection(String address, int port) throws IOException, AuthException {
 		var connection = new SyncConnection(address, port);
-		if (authenticator.authenticate(connection)) {
+		if (connectionAuthenticator.authenticate(connection)) {
 			return connection;
 		} else {
 			connection.close();

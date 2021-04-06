@@ -1,10 +1,12 @@
 package com.diefesson.filesync.cli;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 
 import com.diefesson.filesync.App;
+import com.diefesson.filesync.file.FileStructure;
 import com.diefesson.filesync.io.AuthException;
 
 /**
@@ -62,14 +64,14 @@ public class Cli implements Runnable {
 			var address = c.getArg(0);
 			var port = Integer.parseInt(c.getArg(1));
 			var path = c.getArg(2);
-			app.download(address, port, path).get();
+			app.download(address, port, Path.of(path)).get();
 		} catch (IllegalArgumentException e) {
 			System.out.println("Usage: download <address> <port> <path>");
 		} catch (AuthException e) {
 			System.out.println("Authentication error");
 		} catch (IOException | ExecutionException | InterruptedException e) {
 			System.out.println("Download error: " + e.getMessage());
-			e.printStackTrace();
+			e.printStackTrace(System.out);
 		}
 	}
 
@@ -80,14 +82,14 @@ public class Cli implements Runnable {
 			var address = c.getArg(0);
 			var port = Integer.parseInt(c.getArg(1));
 			var path = c.getArg(2);
-			app.upload(address, port, path).get();
+			app.upload(address, port, Path.of(path)).get();
 		} catch (IllegalArgumentException e) {
 			System.out.println("Usage: upload <address> <port> <path>");
 		} catch (AuthException e) {
 			System.out.println("Authentication error");
 		} catch (IOException | ExecutionException | InterruptedException e) {
 			System.out.println("Upload error: " + e.getMessage());
-			e.printStackTrace();
+			e.printStackTrace(System.out);
 		}
 	}
 
@@ -119,7 +121,7 @@ public class Cli implements Runnable {
 			if (c.argCount() != 1)
 				throw new IllegalArgumentException();
 			app.getUserManager().removeUser(c.getArg(0));
-		} catch (Exception e) {
+		} catch (IllegalArgumentException e) {
 			System.out.println("Usage: remove_user <username>");
 		}
 	}
@@ -151,9 +153,10 @@ public class Cli implements Runnable {
 				throw new IllegalArgumentException();
 			app.getUserManager().saveToFile(null);
 		} catch (IllegalArgumentException e) {
-			System.out.println("Usage: save_credentials");
+			System.out.println("Usage: save_prefs");
 		} catch (IOException e) {
 			System.out.println("Save error: " + e.getMessage());
+			e.printStackTrace(System.out);
 		}
 	}
 
@@ -163,9 +166,44 @@ public class Cli implements Runnable {
 				throw new IllegalArgumentException();
 			app.getUserManager().loadFromFile(null);
 		} catch (IllegalArgumentException e) {
-			System.out.println("Usage: load_credentials");
+			System.out.println("Usage: load_prefs");
 		} catch (IOException e) {
 			System.out.println("Load error: " + e.getMessage());
+		}
+	}
+
+	private void handleListFiles(Command c) {
+		try {
+			if (c.argCount() != 0)
+				throw new IllegalArgumentException();
+			var fileStructure = app.getFileSystemBridge().getFileStructure();
+			printFileStructure(fileStructure);
+		} catch (IllegalArgumentException e) {
+			System.out.println("usage: list_files");
+		}
+	}
+
+	private void handleRescan(Command c) {
+		try {
+			if (c.argCount() != 0)
+				throw new IllegalArgumentException();
+			app.getFileSystemBridge().scan();
+		} catch (IllegalArgumentException e) {
+			System.out.println("usage: list_files");
+		} catch (IOException e) {
+			System.out.println("Rescan error: " + e.getMessage());
+			e.printStackTrace(System.out);
+		}
+	}
+
+	private void handleExit() {
+		System.out.println("Bye bye");
+		System.exit(0);
+	}
+
+	private void printFileStructure(FileStructure fileStructure) {
+		for (var vf : fileStructure) {
+			System.out.println(vf.getType() + " " + vf.toString());
 		}
 	}
 
@@ -185,9 +223,13 @@ public class Cli implements Runnable {
 			case CliConstants.REMOVE_USER -> handleRemoveUser(c);
 			case CliConstants.LOGIN -> handleLogin(c);
 			case CliConstants.GO_ANONYMOUS -> handleGoAnonymous(c);
-			case CliConstants.SAVE_CREDENTIALS -> handleSaveCredentials(c);
-			case CliConstants.LOAD_CREDENTIALS -> handleLoadCredentials(c);
-			case CliConstants.EXIT -> System.exit(0);
+			case CliConstants.SAVE_PREFS -> handleSaveCredentials(c);
+			case CliConstants.LOAD_PREFS -> handleLoadCredentials(c);
+			case CliConstants.LIST_FILES -> handleListFiles(c);
+			case CliConstants.RESCAN -> handleRescan(c);
+			case CliConstants.EXIT -> handleExit();
+			case "" -> {
+			}
 			default -> System.out.println("Unknow comand: " + c.getName());
 			}
 		}

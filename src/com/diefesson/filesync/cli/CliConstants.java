@@ -14,7 +14,10 @@ public class CliConstants {
 	// Sync commands
 	public static final String DOWNLOAD = "download";
 	public static final String UPLOAD = "upload";
-	public static final String SYNC = "list";
+	public static final String SYNC = "sync";
+	public static final String RESCAN = "rescan";
+	public static final String LIST_FILES = "list_files";
+	public static final String LIST_REMOTE_FILES = "list_remote_files";
 
 	// User management commands
 	public static final String ADD_USER = "add_user";
@@ -26,8 +29,8 @@ public class CliConstants {
 	public static final String GO_ANONYMOUS = "go_anonymous";
 
 	// Credential persistence
-	public static final String SAVE_CREDENTIALS = "save_credentials";
-	public static final String LOAD_CREDENTIALS = "load_credentials";
+	public static final String SAVE_PREFS = "save_prefs";
+	public static final String LOAD_PREFS = "load_prefs";
 
 	// Exit command
 	public static final String EXIT = "exit";

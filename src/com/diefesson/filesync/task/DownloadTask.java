@@ -1,11 +1,12 @@
 package com.diefesson.filesync.task;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
-import com.diefesson.filesync.file.AcessSynchronizer;
+import com.diefesson.filesync.file.FileSystemBridge;
 import com.diefesson.filesync.io.SyncConnection;
-import com.diefesson.filesync.server.Constants;
+import com.diefesson.filesync.server.ProtocolConstants;
 
 /**
  * 
@@ -15,22 +16,24 @@ import com.diefesson.filesync.server.Constants;
 public class DownloadTask implements Callable<Void> {
 
 	private final SyncConnection connection;
-	private final String path;
-	private final AcessSynchronizer synchronizer;
+	private final FileSystemBridge fileSystemBridge;
+	private final Path path;
 
-	public DownloadTask(String path, SyncConnection connection, AcessSynchronizer synchronizer) {
-		this.path = path;
+	public DownloadTask(SyncConnection connection, FileSystemBridge fileSystemBridge, Path path) {
 		this.connection = connection;
-		this.synchronizer = synchronizer;
+		this.fileSystemBridge = fileSystemBridge;
+		this.path = path;
 	}
 
 	public Void call() throws IOException {
 		try (connection) {
 			var in = connection.getIn();
 			var out = connection.getOut();
-			out.write(Constants.DOWNLOAD_REQUEST);
-			out.writeUTF(path);
-			in.readToFile(synchronizer.solvePath(path));
+			out.write(ProtocolConstants.DOWNLOAD_REQUEST);
+			out.writeUTF(path.toString());
+			try (var fileOut = fileSystemBridge.writeFile(path)) {
+				in.transferTo(fileOut);
+			}
 			return null;
 		}
 	}

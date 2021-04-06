@@ -1,11 +1,9 @@
 package com.diefesson.filesync;
 
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 
 import com.diefesson.filesync.cli.Cli;
-import com.diefesson.filesync.file.AcessSynchronizer;
-import com.diefesson.filesync.user.UserManager;
 
 /**
  * 
@@ -14,15 +12,19 @@ import com.diefesson.filesync.user.UserManager;
  */
 public class Main {
 	public static void main(String[] args) {
-		var root = (args.length >= 1) ? args[0] : "./";
-		var synchronizer = new AcessSynchronizer(Paths.get(root, "files").toString());
-		var userManager = new UserManager();
+		var root = (args.length >= 1) ? Path.of(args[0]) : Path.of("./");
 		try {
-			userManager.loadFromFile(Paths.get(root, "users.txt").toString());
+			createBasicFiles(root);
+			var app = new App(root);
+			new Cli(app).run();
 		} catch (IOException e) {
-			System.out.println("No users.txt found");
+			System.out.println("IOException during initialization");
+			e.printStackTrace();
 		}
-		var app = new App(synchronizer, userManager);
-		new Cli(app).run();
+	}
+
+	private static void createBasicFiles(Path root) throws IOException {
+		root.resolve("files").toFile().mkdir();
+		root.resolve("users.txt").toFile().createNewFile();
 	}
 }

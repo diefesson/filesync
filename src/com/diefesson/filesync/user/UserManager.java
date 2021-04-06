@@ -5,13 +5,15 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * Manages the credentials of the current user and the users that can access
- * the application
+ * Manages the credentials of the current user and the users that can access the
+ * application
+ * 
  * @author Diefesson de Sousa Silva
  *
  */
@@ -21,7 +23,6 @@ public class UserManager {
 	private final Map<String, String> users;
 	private static final String ANONYMOUS_USERNAME = "anonymous";
 	private static final String ANONYMOUS_PASSWORD = "anonymous";
-	private static final String DEFAULT_SAVE_PATH = "./users.txt";
 
 	public UserManager() {
 		this(ANONYMOUS_USERNAME, ANONYMOUS_PASSWORD);
@@ -75,9 +76,8 @@ public class UserManager {
 		return password.equals(users.get(username));
 	}
 
-	public void loadFromFile(String path) throws IOException {
-		path = (path != null) ? path : DEFAULT_SAVE_PATH;
-		try (var in = new BufferedReader(new FileReader(path))) {
+	public void loadFromFile(Path path) throws IOException {
+		try (var in = new BufferedReader(new FileReader(path.toFile()))) {
 			users.clear();
 			var iterator = in.lines().map((it) -> {
 				return it.split(" ");
@@ -96,7 +96,6 @@ public class UserManager {
 	}
 
 	public void saveToFile(String path) throws IOException {
-		path = (path != null) ? path : DEFAULT_SAVE_PATH;
 		try (var out = new BufferedWriter(new FileWriter(path))) {
 			out.write("%s %s\n".formatted(username, password));
 			for (var kv : users.entrySet()) {
