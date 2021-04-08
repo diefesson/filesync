@@ -18,6 +18,7 @@ public class CliConstants {
 	public static final String RESCAN = "rescan";
 	public static final String LIST_FILES = "list_files";
 	public static final String LIST_REMOTE_FILES = "list_remote_files";
+	public static final String LIST_DIFFS = "list_diffs";
 
 	// User management commands
 	public static final String ADD_USER = "add_user";
@@ -25,7 +26,7 @@ public class CliConstants {
 	public static final String REMOVE_USER = "remove_user";
 
 	// Authentication commands
-	public static final String LOGIN = "login";
+	public static final String AUTH = "auth";
 	public static final String GO_ANONYMOUS = "go_anonymous";
 
 	// Credential persistence

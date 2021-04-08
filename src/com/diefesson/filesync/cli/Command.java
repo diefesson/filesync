@@ -26,6 +26,19 @@ public class Command {
 		return args[index];
 	}
 
+	public int getIntArg(int index) throws CommandException {
+		try {
+			return Integer.parseInt(getArg(index));
+		} catch (IllegalArgumentException e) {
+			throw new CommandException();
+		}
+	}
+
+	public void ensureArgCount(int count) throws CommandException {
+		if (args.length != count)
+			throw new CommandException();
+	}
+
 	public boolean is(String name) {
 		return this.name.equals(name);
 	}

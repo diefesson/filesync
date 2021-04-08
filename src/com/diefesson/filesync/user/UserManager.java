@@ -23,6 +23,7 @@ public class UserManager {
 	private final Map<String, String> users;
 	private static final String ANONYMOUS_USERNAME = "anonymous";
 	private static final String ANONYMOUS_PASSWORD = "anonymous";
+	private static final String FILE_PATH = "users.txt";
 
 	public UserManager() {
 		this(ANONYMOUS_USERNAME, ANONYMOUS_PASSWORD);
@@ -76,8 +77,8 @@ public class UserManager {
 		return password.equals(users.get(username));
 	}
 
-	public void loadFromFile(Path path) throws IOException {
-		try (var in = new BufferedReader(new FileReader(path.toFile()))) {
+	public void loadPrefs() throws IOException {
+		try (var in = new BufferedReader(new FileReader(FILE_PATH))) {
 			users.clear();
 			var iterator = in.lines().map((it) -> {
 				return it.split(" ");
@@ -95,8 +96,8 @@ public class UserManager {
 		}
 	}
 
-	public void saveToFile(String path) throws IOException {
-		try (var out = new BufferedWriter(new FileWriter(path))) {
+	public void savePrefs() throws IOException {
+		try (var out = new BufferedWriter(new FileWriter(FILE_PATH))) {
 			out.write("%s %s\n".formatted(username, password));
 			for (var kv : users.entrySet()) {
 				out.write("%s %s\n".formatted(kv.getKey(), kv.getValue()));

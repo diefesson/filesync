@@ -37,7 +37,7 @@ public class App {
 
 	public App(Path root) throws IOException {
 		userManager = new UserManager();
-		userManager.loadFromFile(root.resolve("users.txt"));
+		userManager.loadPrefs();
 		connectionAuthenticator = new ConnectionAuthenticator(userManager);
 		fileSystemBridge = new FileSystemBridge(root.resolve("files"));
 		executorService = Executors.newFixedThreadPool(8);

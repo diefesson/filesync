@@ -1,8 +1,12 @@
 package com.diefesson.filesync.file;
 
+import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 
@@ -29,6 +33,10 @@ public class VirtualFile implements Iterable<VirtualFile> {
 	public FileType getType() {
 		return type;
 	}
+	
+	public Map<String, VirtualFile> getSubFiles(){
+		return Collections.unmodifiableMap(subFiles);
+	}
 
 	public void add(VirtualFile file) {
 		subFiles.put(file.name, file);
@@ -47,15 +55,29 @@ public class VirtualFile implements Iterable<VirtualFile> {
 	public void removeAll() {
 		subFiles.clear();
 	}
+	
+	public Path getPath() {
+		if(parent != null) {
+			return parent.getPath().resolve(name);
+		} else {
+			return Path.of(name);
+		}
+	}
+	
+	public Set<Pair<VirtualFile, VirtualFile>> subFilesPairs(VirtualFile other){
+		var pairs = new HashSet<Pair<VirtualFile, VirtualFile>>();
+		var names = new HashSet<String>();
+		names.addAll(subFiles.keySet());
+		names.addAll(other.subFiles.keySet());
+		for(var n : names) {
+			pairs.add(new Pair<>(get(n), other.get(n)));
+		}
+		return pairs;
+	}
 
 	@Override
 	public String toString() {
-		var str = (name == null) ? "" : name;
-		if (parent != null && parent.name != null) {
-			return parent.toString() + "/" + str;
-		} else {
-			return str;
-		}
+		return getPath().toString();
 	}
 
 	@Override
