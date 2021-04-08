@@ -34,7 +34,6 @@ public class FileStructure implements Iterable<VirtualFile> {
 
 	private VirtualFile get(Path path) {
 		var current = root;
-		System.out.println("path is " + path);
 		if (path != null) {
 			for (var name : path) {
 				current = current.get(name.toString());

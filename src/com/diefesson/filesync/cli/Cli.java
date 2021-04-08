@@ -183,6 +183,24 @@ public class Cli implements Runnable {
 		}
 	}
 
+	private void handleListRemoteFiles(Command c) {
+		try {
+			if (c.argCount() != 2)
+				throw new IllegalArgumentException();
+			var address = c.getArg(0);
+			var port = Integer.parseInt(c.getArg(1));
+			var future = app.listRemote(address, port);
+			printFileStructure(future.get());
+		} catch (IllegalArgumentException e) {
+			System.out.println("usage: list_remote_files <address> <port>");
+		} catch (AuthException e) {
+			System.out.println("Authentication error");
+		} catch (IOException | ExecutionException | InterruptedException e) {
+			System.out.println("List error: " + e.getMessage());
+			e.printStackTrace(System.out);
+		}
+	}
+
 	private void handleRescan(Command c) {
 		try {
 			if (c.argCount() != 0)
@@ -226,6 +244,7 @@ public class Cli implements Runnable {
 			case CliConstants.SAVE_PREFS -> handleSaveCredentials(c);
 			case CliConstants.LOAD_PREFS -> handleLoadCredentials(c);
 			case CliConstants.LIST_FILES -> handleListFiles(c);
+			case CliConstants.LIST_REMOTE_FILES -> handleListRemoteFiles(c);
 			case CliConstants.RESCAN -> handleRescan(c);
 			case CliConstants.EXIT -> handleExit();
 			case "" -> {

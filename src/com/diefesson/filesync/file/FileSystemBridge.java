@@ -57,8 +57,8 @@ public class FileSystemBridge {
 
 	public void deleteFile(Path path) throws IOException {
 		var abs = root.resolve(path);
-		fileStructure.remove(abs);
-		Files.delete(path);
+		fileStructure.remove(path);
+		Files.delete(abs);
 	}
 
 	public long getSize(Path path) throws IOException {

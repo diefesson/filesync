@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import com.diefesson.filesync.file.FileStructure;
 import com.diefesson.filesync.file.FileSystemBridge;
 import com.diefesson.filesync.io.AuthException;
 import com.diefesson.filesync.io.ConnectionAuthenticator;
@@ -16,6 +17,7 @@ import com.diefesson.filesync.io.SyncConnection;
 import com.diefesson.filesync.server.ConnectionDispatcher;
 import com.diefesson.filesync.server.Server;
 import com.diefesson.filesync.task.DownloadTask;
+import com.diefesson.filesync.task.ListTask;
 import com.diefesson.filesync.task.UploadTask;
 import com.diefesson.filesync.user.UserManager;
 
@@ -80,14 +82,19 @@ public class App {
 		return servers.keySet();
 	}
 
-	public Future<?> download(String address, int port, Path path) throws IOException, AuthException {
+	public Future<Void> download(String address, int port, Path path) throws IOException, AuthException {
 		var connection = createConnection(address, port);
 		return executorService.submit(new DownloadTask(connection, fileSystemBridge, path));
 	}
 
-	public Future<?> upload(String address, int port, Path path) throws IOException, AuthException {
+	public Future<Void> upload(String address, int port, Path path) throws IOException, AuthException {
 		var connection = createConnection(address, port);
 		return executorService.submit(new UploadTask(connection, fileSystemBridge, path));
+	}
+	
+	public Future<FileStructure> listRemote(String address, int port) throws IOException, AuthException {
+		var connection = createConnection(address, port);
+		return executorService.submit(new ListTask(connection));
 	}
 
 	private SyncConnection createConnection(String address, int port) throws IOException, AuthException {

@@ -7,6 +7,7 @@ import com.diefesson.filesync.file.FileSystemBridge;
 import com.diefesson.filesync.io.SyncConnection;
 import com.diefesson.filesync.server.Server.OnConnectListener;
 import com.diefesson.filesync.server.task.ServerDownloadTask;
+import com.diefesson.filesync.server.task.ServerListTask;
 import com.diefesson.filesync.server.task.ServerUploadTask;
 
 /**
@@ -29,10 +30,18 @@ public class ConnectionDispatcher implements OnConnectListener {
 		executorService.execute(() -> {
 			try {
 				int r = connection.getIn().read();
-				if (r == ProtocolConstants.DOWNLOAD_REQUEST) {
+				switch (r) {
+				case ProtocolConstants.DOWNLOAD_REQUEST:
 					executorService.execute(new ServerDownloadTask(connection, fileSystemBridge));
-				} else if (r == ProtocolConstants.UPLOAD_REQUEST) {
+					break;
+				case ProtocolConstants.UPLOAD_REQUEST:
 					executorService.execute(new ServerUploadTask(connection, fileSystemBridge));
+					break;
+				case ProtocolConstants.LIST_FILES_REQUEST:
+					executorService.execute(new ServerListTask(connection, fileSystemBridge));
+					break;
+				default:
+					System.err.println("Received unknow request: " + r);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
