@@ -18,6 +18,8 @@ import com.diefesson.filesync.server.ConnectionDispatcher;
 import com.diefesson.filesync.server.Server;
 import com.diefesson.filesync.task.DownloadTask;
 import com.diefesson.filesync.task.ListTask;
+import com.diefesson.filesync.task.SyncListener;
+import com.diefesson.filesync.task.SyncTask;
 import com.diefesson.filesync.task.UploadTask;
 import com.diefesson.filesync.user.UserManager;
 
@@ -91,13 +93,17 @@ public class App {
 		var connection = createConnection(address, port);
 		return executorService.submit(new UploadTask(connection, fileSystemBridge, path));
 	}
-	
+
 	public Future<FileStructure> listRemote(String address, int port) throws IOException, AuthException {
 		var connection = createConnection(address, port);
 		return executorService.submit(new ListTask(connection));
 	}
 
-	private SyncConnection createConnection(String address, int port) throws IOException, AuthException {
+	public Future<?> sync(String address, int port, SyncListener listener) {
+		return executorService.submit(new SyncTask(this, address, port, listener));
+	}
+
+	public SyncConnection createConnection(String address, int port) throws IOException, AuthException {
 		var connection = new SyncConnection(address, port);
 		if (connectionAuthenticator.authenticate(connection)) {
 			return connection;

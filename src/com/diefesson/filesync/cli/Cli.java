@@ -11,6 +11,7 @@ import com.diefesson.filesync.file.Diff;
 import com.diefesson.filesync.file.DiffSet;
 import com.diefesson.filesync.file.FileStructure;
 import com.diefesson.filesync.io.AuthException;
+import com.diefesson.filesync.task.SyncListener;
 
 /**
  * 
@@ -223,6 +224,45 @@ public class Cli implements Runnable {
 		}
 	}
 
+	private void handleSync(Command c) {
+		try {
+			c.ensureArgCount(2);
+			app.sync(c.getArg(0), c.getIntArg(1), new SyncListener() {
+				
+				@Override
+				public void onRemoteListFetch(FileStructure remote) {
+					System.out.println("Downloaded remote file list");
+				}
+				
+				@Override
+				public void onDiff(DiffSet diffSet) {
+					System.out.println("Found " + diffSet.size() + " differences");
+					System.out.println("Starting syncronization");
+				}
+				
+				@Override
+				public void onProgress(int completed, int total) {
+					System.out.println("Completed " + completed + " of " + total + " operations");
+					if(completed == total) {
+						System.out.println("Syncronization completed");
+					}
+				}
+				
+				@Override
+				public void onError(Exception e) {
+					if (e instanceof AuthException) {
+						System.out.println("Acess denied");
+					} else {
+						System.out.println("An error ocurred while syncing: " + e.getMessage());
+						e.printStackTrace(System.out);
+					}
+				}
+			});
+		} catch (CommandException e) {
+			System.out.println("Usage: sync <address> <port>");
+		}
+	}
+
 	private void handleExit() {
 		System.out.println("Bye bye");
 		System.exit(0);
@@ -262,6 +302,7 @@ public class Cli implements Runnable {
 			case CliConstants.LIST_REMOTE_FILES -> handleListRemoteFiles(c);
 			case CliConstants.LIST_DIFFS -> handleListDiffs(c);
 			case CliConstants.RESCAN -> handleRescan(c);
+			case CliConstants.SYNC -> handleSync(c);
 			case CliConstants.EXIT -> handleExit();
 			case "" -> {
 			}

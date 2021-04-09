@@ -14,7 +14,6 @@ public class DiffSet extends HashSet<Diff> {
 	}
 	
 	private void compare(VirtualFile vf1, VirtualFile vf2) {
-		System.out.println("cmp " + vf1 + " " + vf2);
 		if(vf1 == null) {
 			createDiffs(vf2, DiffType.REMOTE);
 		} else if(vf2 == null) {
