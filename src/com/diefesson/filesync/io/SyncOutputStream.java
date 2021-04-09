@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import com.diefesson.filesync.file.FileStructure;
-import com.diefesson.filesync.file.VirtualFile;
+import com.diefesson.filesync.file.FileType;
 
 /**
  * 
@@ -19,18 +19,17 @@ public class SyncOutputStream extends DataOutputStream {
 	}
 	
 	public void writeFileStructure(FileStructure fileStructure) throws IOException{
-		for(var vf : fileStructure) {
-			writeVirtualFile(vf);
+		var vfs = fileStructure.recurse().iterator();
+		while(vfs.hasNext()) {
+			var vf = vfs.next();
+			writeByte(vf.getType().id);
+			writeUTF(vf.getPath().toString());
 		}
 		writeByte(-1);
 	}
 	
-	private void writeVirtualFile(VirtualFile virtualFile) throws IOException {
-		write(virtualFile.getType().id);
-		writeUTF(virtualFile.toString());
-		for(var vf : virtualFile) {
-			writeVirtualFile(vf);
-		}
+	public void writeFileType(FileType fileType) throws IOException{
+		writeByte(fileType.id);
 	}
 
 }

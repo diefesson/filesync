@@ -51,7 +51,6 @@ public class FileSystemBridge {
 
 	public InputStream readFile(Path path) throws IOException {
 		var abs = root.resolve(path);
-		System.out.println("reading from " + abs.toFile());
 		return new FileInputStream(abs.toFile());
 	}
 
@@ -64,5 +63,9 @@ public class FileSystemBridge {
 	public long getSize(Path path) throws IOException {
 		var abs = root.resolve(path);
 		return Files.size(abs);
+	}
+	
+	public FileType getFileType(Path path) {
+		return fileStructure.get(path).getType();
 	}
 }

@@ -8,8 +8,8 @@ import java.util.concurrent.ExecutionException;
 
 import com.diefesson.filesync.App;
 import com.diefesson.filesync.file.Diff;
+import com.diefesson.filesync.file.DiffSet;
 import com.diefesson.filesync.file.FileStructure;
-import com.diefesson.filesync.file.VirtualFile;
 import com.diefesson.filesync.io.AuthException;
 
 /**
@@ -64,6 +64,7 @@ public class Cli implements Runnable {
 			var port = c.getIntArg(1);
 			var path = c.getArg(2);
 			app.download(address, port, Path.of(path)).get();
+			System.out.println("Download succefull");
 		} catch (CommandException e) {
 			System.out.println("Usage: download <address> <port> <path>");
 		} catch (AuthException e) {
@@ -81,6 +82,7 @@ public class Cli implements Runnable {
 			var port = c.getIntArg(1);
 			var path = c.getArg(2);
 			app.upload(address, port, Path.of(path)).get();
+			System.out.println("Upload succefull");
 		} catch (CommandException e) {
 			System.out.println("Usage: upload <address> <port> <path>");
 		} catch (AuthException e) {
@@ -155,7 +157,8 @@ public class Cli implements Runnable {
 	private void handleLoadPrefs(Command c) {
 		try {
 			c.ensureArgCount(0);
-			app.getUserManager().loadPrefs();;
+			app.getUserManager().loadPrefs();
+			;
 		} catch (CommandException e) {
 			System.out.println("Usage: load_prefs");
 		} catch (IOException e) {
@@ -206,9 +209,9 @@ public class Cli implements Runnable {
 		try {
 			c.ensureArgCount(2);
 			var future = app.listRemote(c.getArg(0), c.getIntArg(1));
-			var remoteFS = future.get();
-			var localFS = app.getFileSystemBridge().getFileStructure();
-			var diffs = localFS.compare(remoteFS);
+			var remote = future.get();
+			var local = app.getFileSystemBridge().getFileStructure();
+			var diffs = new DiffSet(local, remote);
 			printDiffs(diffs);
 		} catch (CommandException e) {
 			System.out.println("usage: list_diffs: <adress> <port>");
@@ -226,21 +229,14 @@ public class Cli implements Runnable {
 	}
 
 	private void printFileStructure(FileStructure fileStructure) {
-		for (var vf : fileStructure) {
-			printVirtualFile(vf);
-		}
-	}
-
-	private void printVirtualFile(VirtualFile virtualFile) {
-		System.out.println(virtualFile.getType() + " " + virtualFile.getPath());
-		for (var vf : virtualFile) {
-			printVirtualFile(vf);
-		}
+		fileStructure.recurse().forEach((vf) -> {
+			System.out.println(vf.getType() + " " + vf.getPath());
+		});
 	}
 
 	private void printDiffs(Set<Diff> diffs) {
 		for (var d : diffs) {
-			System.out.println(d.getType() + " " + d.getPath());
+			System.out.println(d.getDiffType() + " " + d.getFileType() + " " + d.getPath());
 		}
 	}
 

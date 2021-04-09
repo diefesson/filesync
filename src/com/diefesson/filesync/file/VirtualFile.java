@@ -4,16 +4,16 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * 
  * @author Diefesson de Sousa Silva
  *
  */
-public class VirtualFile implements Iterable<VirtualFile> {
+public class VirtualFile{
 
 	private String name;
 	private VirtualFile parent;
@@ -74,15 +74,18 @@ public class VirtualFile implements Iterable<VirtualFile> {
 		}
 		return pairs;
 	}
+	
+	public Stream<VirtualFile> recurse() {
+		var stream = Stream.of(this);
+		for(var vf : subFiles.values()) {
+			stream = Stream.concat(stream, vf.recurse());
+		}
+		return stream;
+	}
 
 	@Override
 	public String toString() {
 		return getPath().toString();
-	}
-
-	@Override
-	public Iterator<VirtualFile> iterator() {
-		return subFiles.values().iterator();
 	}
 
 }

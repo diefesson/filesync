@@ -18,16 +18,24 @@ public class SyncInputStream extends DataInputStream {
 	public SyncInputStream(InputStream in) {
 		super(in);
 	}
-	
-	public FileStructure readFileStructure() throws IOException{
+
+	public FileStructure readFileStructure() throws IOException {
 		var fileStructure = new FileStructure();
 		var typeId = readByte();
-		while(typeId != -1) {
+		while (typeId != -1) {
 			var path = Path.of(readUTF());
 			fileStructure.add(path, FileType.fromId(typeId));
 			typeId = readByte();
 		}
 		return fileStructure;
+	}
+
+	public FileType readFileType() throws IOException {
+		try {
+			return FileType.fromId(readByte());
+		} catch (IllegalArgumentException e) {
+			throw new IOException(e);
+		}
 	}
 
 }

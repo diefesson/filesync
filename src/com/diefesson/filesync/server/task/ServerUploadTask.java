@@ -3,6 +3,7 @@ package com.diefesson.filesync.server.task;
 import java.nio.file.Path;
 
 import com.diefesson.filesync.file.FileSystemBridge;
+import com.diefesson.filesync.file.FileType;
 import com.diefesson.filesync.io.SyncConnection;
 
 /**
@@ -25,8 +26,13 @@ public class ServerUploadTask implements Runnable {
 		try (connection) {
 			var in = connection.getIn();
 			var path = Path.of(in.readUTF());
-			try (var fileOut = fileSystemBridge.writeFile(path)) {
-				in.transferTo(fileOut);
+			var fileType = FileType.fromId(in.readByte());
+			if (fileType == FileType.NORMAL) {
+				try (var fileOut = fileSystemBridge.writeFile(path)) {
+					in.transferTo(fileOut);
+				}
+			} else {
+				fileSystemBridge.createFolder(path);
 			}
 		} catch (Exception e) {
 			System.err.println("ServerUploadTask %s: error donwloading file from client");

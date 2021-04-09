@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 import com.diefesson.filesync.file.FileSystemBridge;
+import com.diefesson.filesync.file.FileType;
 import com.diefesson.filesync.io.SyncConnection;
 
 /**
@@ -28,8 +29,12 @@ public class ServerDownloadTask implements Runnable {
 			var in = connection.getIn();
 			var out = connection.getOut();
 			var path = Path.of(in.readUTF());
-			try (var fileIn = fileSystemBridge.readFile(path)) {
-				fileIn.transferTo(out);
+			var fileType = fileSystemBridge.getFileType(path);
+			out.writeFileType(fileType);
+			if (fileType == FileType.NORMAL) {
+				try (var fileIn = fileSystemBridge.readFile(path)) {
+					fileIn.transferTo(out);
+				}
 			}
 		} catch (IOException e) {
 			System.err.println("ServerDownloadTask %s: error while serving download to client");

@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
 import com.diefesson.filesync.file.FileSystemBridge;
+import com.diefesson.filesync.file.FileType;
 import com.diefesson.filesync.io.SyncConnection;
 import com.diefesson.filesync.server.ProtocolConstants;
 
@@ -31,8 +32,13 @@ public class DownloadTask implements Callable<Void> {
 			var out = connection.getOut();
 			out.write(ProtocolConstants.DOWNLOAD_REQUEST);
 			out.writeUTF(path.toString());
-			try (var fileOut = fileSystemBridge.writeFile(path)) {
-				in.transferTo(fileOut);
+			var fileType = FileType.fromId(in.readByte());
+			if (fileType == FileType.NORMAL) {
+				try (var fileOut = fileSystemBridge.writeFile(path)) {
+					in.transferTo(fileOut);
+				}
+			} else {
+				fileSystemBridge.createFolder(path);
 			}
 			return null;
 		}
