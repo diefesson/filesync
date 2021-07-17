@@ -1,2 +1,2 @@
 # filesync
-Project for Computer Network discipline
+Final project of the Computer Networks course
